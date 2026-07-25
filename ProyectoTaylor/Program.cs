@@ -1,10 +1,14 @@
 using ProyectoTaylor.Components;
+using ProyectoTaylor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+builder.Services.AddScoped<TaylorCalculoService>();
+builder.Services.AddScoped<TaylorHtmlService>();
 
 var app = builder.Build();
 
