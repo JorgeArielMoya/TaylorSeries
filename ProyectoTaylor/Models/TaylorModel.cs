@@ -1,6 +1,6 @@
 ﻿namespace ProyectoTaylor.Models;
 
-public class Taylor
+public class TaylorModel
 {
     public string Funcion { get; set; } = string.Empty;
     public string ValorC { get; set; } = string.Empty;
