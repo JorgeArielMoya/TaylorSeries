@@ -10,47 +10,52 @@
         <div class="col-12 col-lg-6 mb-3">
             <div class="card card-minimal shadow-sm h-100">
 
-                <div class="card-header card-header-minimal">
-                    <h4 class="text-center">Ingrese los datos</h4>
-                </div>
+                <EditForm Model="Modelo" OnValidSubmit="CalcularDerivadas">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
 
-                <div class="card-body card-body-minimal">
-                    <div class="mb-3">
-                        <label class="col-form-label w-100 text-center label-minimal">Función:</label>
-                        <InputText class="form-control input-minimal"
-                                   placeholder="Ej: cos(x) | e^(2x)"
-                                   @bind-Value="Funcion" />
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="col-form-label w-100 text-center label-minimal">C:</label>
-                        <InputText class="form-control input-minimal"
-                                   placeholder="Ej: pi/4 | 0"
-                                   @bind-Value="ValorC" />
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="col-form-label w-100 text-center label-minimal">Cantidad de polinomios:</label>
-                        <InputNumber class="form-control input-minimal"
-                                     placeholder="Ej: 5 | 6"
-                                     @bind-Value="CantPolinomios" />
-                    </div>
-
-                    @if (CantPolinomios <= 0)
-                    {
-                        <div class="error-minimal">
-                            Por favor, ingrese una cantidad >= 0
+                    <div class="card card-minimal shadow-sm h-100">
+                        <div class="card-header card-header-minimal">
+                            <h4 class="text-center">Ingrese los datos</h4>
                         </div>
-                    }
-                </div>
 
-                <div class="card-footer card-footer-minimal text-center">
-                    <button type="button"
-                            class="btn btn-calcular bi bi-calculator"
-                            @onclick="CalcularDerivadas">
-                        Calcular
-                    </button>
-                </div>
+                        <div class="card-body card-body-minimal">
+                            <div class="mb-3">
+                                <label class="col-form-label w-100 text-center label-minimal">Función:</label>
+                                <InputText class="form-control input-minimal"
+                                           placeholder="Ej: cos(x) | e^(2x)"
+                                           @bind-Value="Modelo.Funcion" />
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="col-form-label w-100 text-center label-minimal">C:</label>
+                                <InputText class="form-control input-minimal"
+                                           placeholder="Ej: pi/4 | 0"
+                                           @bind-Value="Modelo.ValorC" />
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="col-form-label w-100 text-center label-minimal">Cantidad de polinomios:</label>
+                                <InputNumber class="form-control input-minimal"
+                                             placeholder="Ej: 5 | 6"
+                                             @bind-Value="Modelo.CantPolinomios" />
+                            </div>
+
+                            @if (Modelo.CantPolinomios <= 0)
+                            {
+                                <div class="error-minimal">
+                                    Por favor, ingrese una cantidad >= 0
+                                </div>
+                            }
+                        </div>
+
+                        <div class="card-footer card-footer-minimal text-center">
+                            <button type="submit" class="btn btn-calcular bi bi-calculator">
+                                Calcular
+                            </button>
+                        </div>
+                    </div>
+                </EditForm>
             </div>
         </div>
 
@@ -102,193 +107,3 @@
         </div>
     </div>
 </div>
-
-@code{
-    private string Funcion { get; set; } = string.Empty;
-
-    private string ValorC { get; set; } = string.Empty;
-
-    private int CantPolinomios { get; set; } = 1;
-
-    private List<string> ResultadosDerivadas = new List<string>();
-
-    private bool _calculado = false;
-
-    private double ParseValorC(string input)
-    {
-        if (string.IsNullOrWhiteSpace(input)) return 0;
-
-        input = input.Trim().ToLower()
-                     .Replace("pi", Math.PI.ToString("R", System.Globalization.CultureInfo.InvariantCulture))
-                     .Replace("e", Math.E.ToString("R", System.Globalization.CultureInfo.InvariantCulture));
-
-        var expr = Expr.Parse(input);
-        var resultado = expr.Evaluate(new Dictionary<string, FloatingPoint>());
-        return resultado.RealValue;
-    }
-
-    private string NormalizarFuncion(string input)
-    {
-        input = input.Trim().ToLower();
-
-        // 2x → 2*x, 3sin → 3*sin, etc.
-        input = System.Text.RegularExpressions.Regex.Replace(input, @"(\d)([a-z])", "$1*$2");
-
-        // e^(2*x) o e^x → exp(2*x) o exp(x)
-        input = System.Text.RegularExpressions.Regex.Replace(input, @"e\^(\([^)]+\)|\w+)", "exp($1)");
-
-        return input;
-    }
-
-    // Jorge
-    private void CalcularDerivadas()
-    {
-        ResultadosDerivadas.Clear();
-
-        double valorCNumerico;
-        try
-        {
-            valorCNumerico = ParseValorC(ValorC);
-        }
-        catch
-        {
-            ResultadosDerivadas.Add("Error: El valor de C no es válido.");
-            return;
-        }
-       
-        try
-        {
-            var expr = Expr.Parse(NormalizarFuncion(Funcion));
-            var derivadaActual = expr;
-
-            for (int i = 0; i <= CantPolinomios; i++)
-            {
-                var evaluada = derivadaActual.Evaluate(new Dictionary<string, FloatingPoint>
-                {
-                    { "x", valorCNumerico }
-                });
-
-                string valorFormateado = evaluada.RealValue.ToString("F2");
-                string texto;
-
-                string ExprToDisplay(SymbolicExpression e, string originalInput = null)
-                {
-                    string s = originalInput ?? e.ToString();
-                    s = System.Text.RegularExpressions.Regex.Replace(s, @"exp\(([^)]+)\)", "e^($1)");
-                    return s;
-                }
-
-                string cMostrado = MostrarConPi(ValorC);
-
-                if (i == 0)
-                {
-                    texto = $"f(x) = {ExprToDisplay(derivadaActual, MostrarConPi(Funcion.Trim()))} → f({cMostrado}) = {valorFormateado}";
-                }
-                else
-                {
-                    string superindice = ToSuperscript(i);
-                    texto = $"f{superindice}(x) = {ExprToDisplay(derivadaActual)} → f{superindice}({cMostrado}) = {valorFormateado}";
-                }
-
-                ResultadosDerivadas.Add(texto);
-                derivadaActual = derivadaActual.Differentiate("x");
-            }
-            _calculado = true;       
-        }
-        catch (Exception ex)
-        {
-            ResultadosDerivadas.Add($"Error: {ex.Message}");
-        }
-    }
-
-    private string GenerarPolinomioHTML()
-    {
-        if (!_calculado || ResultadosDerivadas.Count < CantPolinomios + 1)
-        return "";
-
-        double valorCNum;
-        try 
-        { 
-            valorCNum = ParseValorC(ValorC); 
-        }
-        catch 
-        { 
-            return "<span class='text-danger'>Error en el valor de C</span>"; 
-        }
-
-        var sb = new System.Text.StringBuilder();
-        sb.Append("<span class='polinomio-resultado'>");
-
-        bool primero = true;
-        System.Numerics.BigInteger factorial = 1;
-        
-        for (int i = 0; i <= CantPolinomios; i++)
-        {
-            if (i > 0) factorial *= i;
-
-            var linea = ResultadosDerivadas[i];
-            var partes = linea.Split('=');
-
-            if (!double.TryParse(partes.Last().Trim(),
-                System.Globalization.NumberStyles.Any,
-                System.Globalization.CultureInfo.InvariantCulture,
-                out double coef))
-                continue;
-
-            if (Math.Abs(coef) < 1e-10) continue;
-
-            string signo = coef < 0 ? " − " : (primero ? "" : " + ");
-            double absCoef = Math.Abs(coef);
-
-            string coefStr = absCoef.ToString("F4").TrimEnd('0').TrimEnd('.');
-            string coefDisplay = Math.Abs(absCoef - 1.0) < 1e-10 && i > 0 ? "" : coefStr + " ";
-
-            sb.Append($"<span class='taylor-sign'>{signo}</span>");
-
-            bool cEsCero = Math.Abs(valorCNum) < 1e-10;
-            string xTermino = cEsCero ? "x" : $"(x − {MostrarConPi(ValorC)})";
-
-            string numerador = i == 0
-                ? coefStr
-                : i == 1
-                    ? $"{coefDisplay}{xTermino}"
-                    : $"{coefDisplay}{xTermino}<sup>{ToSuperscript(i)}</sup>";
-
-            if (factorial > 1)
-            {
-                sb.Append($@"<span class='taylor-frac'>
-                <span class='taylor-num'>{numerador}</span>
-                <span class='taylor-den'>{i}!</span>
-                </span>");
-            }
-            else
-            {
-                sb.Append($"<span>{numerador}</span>");
-            }
-
-            primero = false;
-        }
-
-        sb.Append("</span>");
-        return sb.ToString();
-    }
-
-    // Isaac
-    private string ToSuperscript(int n)
-    {
-        var superscripts = new Dictionary<char, char>
-        {
-            {'0','⁰'}, {'1','¹'}, {'2','²'}, {'3','³'}, {'4','⁴'},
-            {'5','⁵'}, {'6','⁶'}, {'7','⁷'}, {'8','⁸'}, {'9','⁹'}
-        };
-
-        return string.Concat(n.ToString().Select(c => superscripts[c]));
-    }
-    private string MostrarConPi(string input)
-    {
-        return System.Text.RegularExpressions.Regex.Replace(
-            input, @"\bpi\b", "π", 
-            System.Text.RegularExpressions.RegexOptions.IgnoreCase
-        );
-    }
-}
