@@ -1,7 +1,7 @@
 ﻿@page "/"
 @rendermode InteractiveServer
-@using MathNet.Symbolics;
-@using Expr = MathNet.Symbolics.SymbolicExpression;
+@inject TaylorCalculoService CalculoService
+@inject TaylorHtmlService HtmlService
 
 <PageTitle> Proyecto Taylor </PageTitle>
 
@@ -109,14 +109,10 @@
 </div>
 
 @code {
-    [Inject]
-    private TaylorCalculoService CalculoService { get; set; } = default!;
-
-    [Inject]
-    private TaylorHtmlService HtmlService { get; set; } = default!;
-
     private TaylorModel Modelo { get; set; } = new();
+
     private List<string> ResultadosDerivadas { get; set; } = new();
+
     private bool _calculado = false;
 
     private void CalcularDerivadas()
