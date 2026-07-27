@@ -7,6 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+//Inyeccion de los services
 builder.Services.AddScoped<TaylorCalculoService>();
 builder.Services.AddScoped<TaylorHtmlService>();
 
