@@ -30,7 +30,6 @@ ProyectoTaylor/
 │   └── Pages/
 │       └── TaylorPages/
 │           ├── Taylor.razor    # Vista principal de cálculo y aproximaciones
-│           └── Creditos.razor  # Sección de créditos e información del proyecto
 ├── Models/
 │   └── TaylorModel.cs       # Entidades y datos del modelo matemático
 ├── Services/
