@@ -17,7 +17,7 @@
 
 * **Cálculo de Series de Taylor:** Motor especializado para procesar aproximaciones matemáticas de alta precisión.
 * **Arquitectura Modular (Servicios y Modelos):** Separación limpia entre la lógica de cálculo (`TaylorCaculoService`), la manipulación de vistas (`TaylorHtmlService`) y las entidades (`TaylorModel`).
-* **Interfaz Interactiva (Blazor):** Páginas dinámicas desarrolladas con componentes Razor (`Taylor.razor`, `Creditos.razor`) para una experiencia fluida.
+* **Interfaz Interactiva (Blazor):** Páginas dinámicas desarrolladas con componente Razor (`Taylor.razor`) para una experiencia fluida.
 
 ---
 
